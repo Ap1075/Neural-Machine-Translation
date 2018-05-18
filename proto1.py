@@ -15,7 +15,7 @@ from sklearn.model_selection import train_test_split
 
 #loading the data
 def load_doc(filename):
-    file = open(filename, 'r', encoding="utf-8")
+    file = open(filename, mode="rt", encoding="utf-8")
     text = file.read()
     file.close()
     return text
@@ -57,7 +57,7 @@ def save_clean_data(sentences, filename):
     print("saved: {}".format(filename))
     
 # input the dataset
-filename = "deu.txt"
+filename = "deunew.txt"
 doc = load_doc(filename)
 #splitting by languages
 pairs = to_pairs(doc)
@@ -76,10 +76,10 @@ def load_clean_dataset(filename):
 raw_dataset = load_clean_dataset("english-german.pkl")
 
 ############ REDUCING SIZE
-no_sentences = 10000
+no_sentences = 50000
 dataset = raw_dataset[:no_sentences,:]
 np.random.shuffle(dataset)
-train, test = dataset[:8000],dataset[8000:]
+train, test = dataset[:45000],dataset[45000:]
 
 #final save
 save_clean_data(dataset, "english-german.pkl")
@@ -148,6 +148,8 @@ def define_model(src_vocab, tar_vocab, src_timesteps, tar_timesteps, n_units):
     model.add(RepeatVector(tar_timesteps)) 
     #decoder =>
     model.add(LSTM(n_units,return_sequences=True)) # +1 LSTM layer for decoding
+    model.add(LSTM(n_units,return_sequences=True))
+    model.add(LSTM(n_units,return_sequences=True))
     model.add(LSTM(n_units, return_sequences=True))
     model.add(TimeDistributed(Dense(tar_vocab, activation='softmax')))
     return model
@@ -175,18 +177,14 @@ testY = encode_sequences(eng_tokenizer, eng_length, test[:, 0])
 testY = encode_output(testY, eng_vocab_size)
 
 # define model
-model = define_model(ger_vocab_size, eng_vocab_size, ger_length, eng_length, 256) # vocab size is total number of words, length is max sentence length
-model.compile(optimizer='adam', loss='categorical_crossentropy')
+model = define_model(ger_vocab_size, eng_vocab_size, ger_length, eng_length, 512) # vocab size is total number of words, length is max sentence length
+model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['acc'])
 
 # summarize defined model
 print(model.summary())
 plot_model(model, to_file='model.png', show_shapes=True)
 
 #fitting the model
-filename = "model1.h5"
-checkpt = ModelCheckpoint(filename, monitor = "val_loss", verbose = 1, save_best_only = True, mode="min")
-model.fit(trainX, trainY, epochs= 50, batch_size = 64, validation_data = (testX,testY), callbacks = [checkpt], verbose = 2)
-              
-        
-
-# Inference
+filename = "4Input_4output_50000samples_rmsprop.h5"
+checkpt = ModelCheckpoint(filename, monitor = "val_acc", verbose = 1, save_best_only = True, mode="max")
+model.fit(trainX, trainY,  epochs= 75, batch_size = 128, validation_data = (testX,testY), callbacks = [checkpt], verbose = 2)
