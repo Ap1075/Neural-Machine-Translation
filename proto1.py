@@ -180,7 +180,7 @@ model.compile(optimizer='adam', loss='categorical_crossentropy')
 
 # summarize defined model
 print(model.summary())
-plot_model(model, to_file='model.png', show_shapes=True)
+plot_model(model, to_file='model1.png', show_shapes=True)
 
 #fitting the model
 filename = "model1.h5"
