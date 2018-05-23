@@ -105,6 +105,7 @@ from keras.layers import RepeatVector
 from keras.layers import Bidirectional
 from keras.layers import TimeDistributed
 from keras.callbacks import ModelCheckpoint
+
  
 # load a clean dataset
 def load_clean_sentences(filename):
@@ -137,6 +138,20 @@ def encode_output(sequences, vocab_size):
     y = np.array(ylist)
     y = y.reshape(sequences.shape[0], sequences.shape[1], vocab_size)
     return y
+
+# ============================================================================= Generator if memory error seen accordingly change fit to fit_gen
+# def gen(trainX, trainY, batch_size, vocab_size):
+#     X = np.zeros((trainX.shape[0], trainX.shape[1]))
+#     Y = np.zeros((trainY.shape[0], trainY.shape[1]))
+#     while True:
+#         for i in range(batch_size):
+#             index = np.random.choice(len(trainX),1)
+#             X[i] = trainX[index]
+#             Y[i] = to_categorical(trainY[index], num_classes = vocab_size)
+#         yield X, Y
+# =============================================================================
+            
+    
 
 # bidirectional Encoder without attention
 def define_model(src_vocab, tar_vocab, src_timesteps, tar_timesteps, n_units):
@@ -188,3 +203,45 @@ plot_model(model, to_file='model.png', show_shapes=True)
 filename = "4Input_4output_50000samples_rmsprop.h5"
 checkpt = ModelCheckpoint(filename, monitor = "val_acc", verbose = 1, save_best_only = True, mode="max")
 model.fit(trainX, trainY,  epochs= 75, batch_size = 128, validation_data = (testX,testY), callbacks = [checkpt], verbose = 2)
+
+# Prediction
+from keras.models import load_model
+from numpy import argmax
+
+model = load_model("4Input_4output_50000samples.h5")
+
+# converting integer to word from tokenizer
+def word_from_id(integer, tokenizer):
+    for word, index in tokenizer.word_index.items():
+        if index == integer:
+            return word
+    return None
+
+# generating target from source
+def predict_sequence(model, tokenizer, source ):
+    prediction = model.predict(source, verbose=0)[0]
+    integers = [argmax(vector) for vector in prediction]
+    target = []
+    for i in integers:
+        word = word_from_id(i, tokenizer)
+        if word is None:
+            break
+        target.append(word)
+    return ' '.join(target)
+
+def evaluate_model(model, tokenizer, sources, raw_dataset):
+	actual, predicted = list(), list()
+	for i, source in enumerate(sources):
+		# translate encoded source text
+		source = source.reshape((1, source.shape[0]))
+		translation = predict_sequence(model, eng_tokenizer, source)
+		raw_target, raw_src = raw_dataset[i]
+		if i < 10:
+			print('src=[%s], target=[%s], predicted=[%s]' % (raw_src, raw_target, translation))
+		actual.append(raw_target.split())
+		predicted.append(translation.split())
+
+trainX = encode_sequences(ger_tokenizer, ger_length, train[:, 1])
+testX = encode_sequences(ger_tokenizer, ger_length, test[:, 1])
+
+evaluate_model(model, eng_tokenizer, trainX, train)
