@@ -139,17 +139,23 @@ def encode_output(sequences, vocab_size):
     y = y.reshape(sequences.shape[0], sequences.shape[1], vocab_size)
     return y
 
-# ============================================================================= Generator if memory error seen accordingly change fit to fit_gen
-# def gen(trainX, trainY, batch_size, vocab_size):
-#     X = np.zeros((trainX.shape[0], trainX.shape[1]))
-#     Y = np.zeros((trainY.shape[0], trainY.shape[1]))
-#     while True:
-#         for i in range(batch_size):
-#             index = np.random.choice(len(trainX),1)
-#             X[i] = trainX[index]
-#             Y[i] = to_categorical(trainY[index], num_classes = vocab_size)
-#         yield X, Y
-# =============================================================================
+def gen(trainX, trainY, batch_size, vocab_size):
+    X = np.zeros((trainX.shape[0], trainX.shape[1]))
+    Ylist = []
+    i =0
+    while True:
+        for b in range(batch_size):
+            if i == len(trainX):
+                 i = 0
+                 np.random.shuffle(trainX)
+            X[i] = trainX[i]
+            encoded = to_categorical(trainY[i], num_classes = vocab_size)
+            i+=1       
+            Ylist.append(encoded) 
+        Y = np.array(Ylist)
+        Ylist=[]
+        Y = np.reshape(batch_size, trainY.shape[1], vocab_size)
+        yield X, Y
             
     
 
