@@ -1,4 +1,4 @@
-from __ import load_doc,to_pairs,norm_pairs,load_clean_dataset,save_clean_data
+from mactrans.train_mod import load_doc,to_pairs,norm_pairs,load_clean_dataset,save_clean_data
 from __ import create_tokenizer,max_length,encode_sequences,new_gen,read_all_embeddings,define_model,mat_builder
 import argparse 
 import numpy as np
@@ -70,7 +70,8 @@ def trainer(model_path, dataset_path,word_vec,epochs,batch_size,steps_per_epoch,
     checkpt = ModelCheckpoint(filegen, monitor = "val_acc", verbose = 2, save_best_only = True, mode="max")
     history=model.fit_generator(generator = new_gen(trainX,trainY, batch_size, eng_vocab_size),validation_data=new_gen(testX,testY,batch_size,eng_vocab_size), epochs=epochs,steps_per_epoch=steps_per_epoch, shuffle=False, validation_steps=validation_steps , verbose=1, callbacks=[checkpt,loss_acc_hist])
 
-trainer(args.model_path, args.dataset_path,args.word_vec,args.epochs,args.batch_size,args.steps_per_epoch,args.validation_steps)
+if __name__ =="__main__":
+    trainer(args.model_path, args.dataset_path,args.word_vec,args.epochs,args.batch_size,args.steps_per_epoch,args.validation_steps)
 
 
 
