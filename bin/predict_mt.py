@@ -1,24 +1,18 @@
-from common import encode_sequences
-from __ import word_from_id ,predictions,fin_pred_model,punc_remover_lower
+from mactrans.pred_mod import predicter
 import argparse
-from keras.models import load_model
-import numpy as np
 #import tensorflow as tf
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-s", metavar="string_to_translate",dest="src_sent", help="This is the string that must be translated to the other language", type=str)
+def parser_creator():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", metavar="string_to_translate",dest="src_sent", help="This is the string that must be translated to the other language", type=str)
+    parser.add_argument("-e", metavar="Path to english tokenizer",dest="eng_tok_path", help="Path to the trained english tokenizer.", type=str)
+    parser.add_argument("-g", metavar="Path to german tokenizer",dest="ger_tok_path", help="Path to the trained german tokenizer.", type=str)
+    parser.add_argument("-d", metavar="Path to dict_vars",dest="dict_vars_path", help="Path to the dictionary containing variables to be used for prediction.", type=str)
+    return parser
+    
+if __name__=="__main__":
+    parser = parser_creator()
+    args = parser.parse_args()
+    predict = predicter(args.src_sent,args.eng_tok_path,args.ger_tok_path,args.dict_vars_path)
+    predict.execute()
 
-args = parser.parse_args()
-
-eng_tokenizer = np.load(open("./home/alindsharma/work/armaan/mactrans/output/eng_tok.pkl","rb"))
-ger_tokenizer = np.load(open("./home/alindsharma/work/armaan/mactrans/output/ger_tok.pkl","rb"))
-dict_vars = np.load(open("./home/alindsharma/work/armaan/mactrans/output/dict_vars.pkl",'rb'))
-
-model = load_model(dict_vars["model_path"])        
-
-ger_sent = args.src_sent
-ger_sent = punc_remover_lower(ger_sent)
-ger_sent = encode_sequences(ger_tokenizer, dict_vars['ger_maxlen'], ger_sent)
-fin_source =list()
-fin_source.append(ger_sent)
-fin_pred_model(fin_source, eng_tokenizer, model)
