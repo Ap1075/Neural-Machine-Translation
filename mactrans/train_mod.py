@@ -1,10 +1,10 @@
 import numpy as np
-import re
+#import re
 import string 
 import pickle
-from unicodedata import normalize
-import matplotlib.pyplot as plt
-import argparse
+#from unicodedata import normalize
+#import matplotlib.pyplot as plt
+#import argparse
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from keras.utils import to_categorical
