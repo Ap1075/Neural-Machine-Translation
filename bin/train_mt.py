@@ -24,6 +24,7 @@ def parser_creator():
                         type=str)
 
     parser.add_argument("-n", meta_var="no of epochs", dest="epochs",
+                        default=50,
                         help='Iterations whole dataset is passed to the model',
                         type=int)
 
