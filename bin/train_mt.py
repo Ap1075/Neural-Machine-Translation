@@ -4,8 +4,8 @@ Created on Thu Jun 14 22:50:48 2018
 
 @author: Armaan Puri
 """
-from mactrans.train_mod import trainer
 import argparse
+from mactrans.train_mod import trainer
 
 
 def parser_creator():

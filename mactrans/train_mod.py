@@ -104,8 +104,8 @@ class trainer(object):
                     encoded = to_categorical(trainY[i],
                                              num_classes=vocab_size)
                     ylist.append(encoded)
-                    Y = np.array(ylist)
-                    Y = Y.reshape(batch_size, trainY.shape[1], vocab_size)
+                Y = np.array(ylist)
+                Y = Y.reshape(batch_size, trainY.shape[1], vocab_size)
                 yield X, Y
 
     def read_all_embeddings(self, filename):
@@ -215,7 +215,7 @@ class trainer(object):
 
         model = self.define_model(ger_vocab_size,
                                   eng_vocab_size, ger_length,
-                                  eng_length, no_units)
+                                  eng_length, no_units,embedding_mat)
         model.compile(optimizer='adam',
                       loss='categorical_crossentropy', metrics=['acc'])
 
