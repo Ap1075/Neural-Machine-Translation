@@ -26,8 +26,8 @@ from keras import backend as K
 
 class trainer(object):
 
-    def __init__(self, model_path, word_vec_path, dataset_path):
-        self.model_path = model_path
+    def __init__(self, prefix, word_vec_path, dataset_path):
+        self.prefix = prefix
         self.word_vec_path = word_vec_path
         self.dataset_path = dataset_path
 
@@ -37,7 +37,7 @@ class trainer(object):
         file.close()
         return text
 
-# separate eng and ger
+# separate tar and src
     def to_pairs(self, file):
         lines = file.strip().split('\n')
         pairs = [line.split('\t') for line in lines]
@@ -110,17 +110,20 @@ class trainer(object):
 
     def read_all_embeddings(self, filename):
         embeddings = dict()
+        c = 0
         with open(filename) as f:
             for line in f:
                 line = line.split()
 #                if len(line) == 65:
                 word = line[0]
                 coeffs = line[1:]
+                if c == 0:
+                    c = len(coeffs)
                 embeddings[word] = coeffs
-        return embeddings
+        return embeddings, c
 
-    def mat_builder(self, embed, tokenizer, ger_voc):
-        embedding_mat = np.zeros((ger_voc, 64))
+    def mat_builder(self, embed, coeff_len, tokenizer, ger_voc):
+        embedding_mat = np.zeros((ger_voc, coeff_len))
         count = 0
         for word, i in tokenizer.word_index.items():
             embedding_vec = embed.get(word)
@@ -175,6 +178,8 @@ class trainer(object):
         raw_dataset = cleaned_pairs
         np.random.shuffle(raw_dataset)
         dataset = raw_dataset
+
+        # design decision to split at 90% of dataset.
         train, test = dataset[:135000], dataset[135000:]
 
         eng_tokenizer = self.create_tokenizer(dataset[:, 0])
@@ -184,14 +189,16 @@ class trainer(object):
         ger_tokenizer = self.create_tokenizer(dataset[:, 1])
         ger_vocab_size = len(ger_tokenizer.word_index) + 1
         ger_length = self.max_length(dataset[:, 1])
-
-        self.save_clean_data(eng_tokenizer, "./output/eng_tok.pkl")
-        self.save_clean_data(ger_tokenizer, "./output/ger_tok.pkl")
+#        self.save_clean_data(eng_tokenizer, "./output/eng_tok.pkl")
+#        self.save_clean_data(ger_tokenizer, "./output/ger_tok.pkl")
 
         dict_vars = {"ger_maxlen": ger_length,
-                     "model_path": "./output/model_generator.h5",
+                     "model_path": self.prefix+".h5",
                      "eng_maxlen": eng_length}
-        self.save_clean_data(dict_vars, "./output/dict_vars.pkl")
+#        self.save_clean_data(dict_vars, "./output/dict_vars.pkl")
+
+        with open(self.prefix+".pickle") as f:
+            pickle.dump((eng_tokenizer, ger_tokenizer, dict_vars), f)
 
         trainX = self.encode_sequences(ger_tokenizer, ger_length, train[:, 1])
         trainY = self.encode_sequences(eng_tokenizer, eng_length, train[:, 0])
@@ -200,9 +207,9 @@ class trainer(object):
         testX = self.encode_sequences(ger_tokenizer, ger_length, test[:, 1])
         testY = self.encode_sequences(eng_tokenizer, eng_length, test[:, 0])
 
-        embed = self.read_all_embeddings(self.word_vec_path)
+        embed, coeff_len = self.read_all_embeddings(self.word_vec_path)
 
-        embedding_mat, counter = self.mat_builder(embed,
+        embedding_mat, counter = self.mat_builder(embed, coeff_len,
                                                   ger_tokenizer,
                                                   ger_vocab_size)
 
@@ -212,7 +219,7 @@ class trainer(object):
         model.compile(optimizer='adam',
                       loss='categorical_crossentropy', metrics=['acc'])
 
-        filegen = self.model_path
+        filegen = dict_vars["model_path"]
 
         checkpt = ModelCheckpoint(filegen, monitor="val_acc",
                                   verbose=2, save_best_only=True, mode="max")
@@ -220,10 +227,10 @@ class trainer(object):
         generator = self.new_gen(trainX, trainY, batch_size, eng_vocab_size)
         val_data = self.new_gen(testX, testY, batch_size, eng_vocab_size)
 
-        history = model.fit_generator(generator=generator,
-                                      validation_data=val_data,
-                                      epochs=epochs,
-                                      steps_per_epoch=steps_per_epoch,
-                                      shuffle=False,
-                                      validation_steps=val_steps,
-                                      verbose=1, callbacks=[checkpt])
+        model.fit_generator(generator=generator,
+                            validation_data=val_data,
+                            epochs=epochs,
+                            steps_per_epoch=steps_per_epoch,
+                            shuffle=False,
+                            validation_steps=val_steps,
+                            verbose=1, callbacks=[checkpt])

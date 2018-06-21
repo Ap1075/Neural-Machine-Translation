@@ -9,12 +9,9 @@ import string
 
 class predicter(object):
 
-    def __init__(self, src_sent, eng_tok_path,
-                 ger_tok_path, dict_vars_path):
+    def __init__(self, src_sent, prefix):
         self.src_sent = src_sent
-        self.eng_tok_path = eng_tok_path
-        self.ger_tok_path = ger_tok_path
-        self.dict_vars_path = dict_vars_path
+        self.prefix = prefix
 
 # with tf.device("/gpu:0"):
     def encode_sequences(self, tokenizer, length, lines):
@@ -57,15 +54,13 @@ class predicter(object):
         return cleaned
 
     def execute(self):
-        eng_tokenizer = np.load(open(self.eng_tok_path, "rb"))
-        ger_tokenizer = np.load(open(self.ger_tok_path, "rb"))
-        dict_vars = np.load(open(self.dict_vars_path, 'rb'))
+        eng_tok, ger_tok, dict_vars = np.load(open(self.prefix+".pkl", "rb"))
 
         model = load_model(dict_vars["model_path"])
 
         ger_sent = self.src_sent
         ger_sent = self.punc_remover_lower(ger_sent)
-        ger_sent = self.encode_sequences(ger_tokenizer,
+        ger_sent = self.encode_sequences(ger_tok,
                                          dict_vars['ger_maxlen'], ger_sent)
 
-        self.fin_pred_model(ger_sent, eng_tokenizer, model)
+        self.fin_pred_model(ger_sent, eng_tok, model)

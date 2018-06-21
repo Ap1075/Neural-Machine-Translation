@@ -11,24 +11,29 @@ import argparse
 def parser_creator():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-p', meta_var="model", dest="model_path",
-                        help="Path to store hdf5 model file",
+    parser.add_argument('-p', metavar="Prefix for model, toks and variables",
+                        dest="prefix",
+                        help="Prefix to store model,Tokenizers and Vars.",
                         type=str)
 
-    parser.add_argument("-c", meta_var="train_test_set", dest="dataset_path",
-                        help="Path to the cleaned corpus",
+    parser.add_argument("-t", metavar="train_test_set",
+                        dest="dataset_path",
+                        help="Path to the formatted corpus",
                         type=str)
 
-    parser.add_argument("-w", meta_var="Word vec path", dest="word_vec_path",
+    parser.add_argument("-w", metavar="Word vec path",
+                        dest="word_vec_path",
                         help="Path to preprocessed word embeddings",
                         type=str)
 
-    parser.add_argument("-n", meta_var="no of epochs", dest="epochs",
+    parser.add_argument("-n", metavar="no of epochs",
+                        dest="epochs",
                         default=50,
                         help='Iterations whole dataset is passed to the model',
                         type=int)
 
-    parser.add_argument("-b", metavar="batch_size", dest="batch_size",
+    parser.add_argument("-b", metavar="batch_size",
+                        dest="batch_size",
                         default=125,
                         help="No of rows output from generator in single call",
                         type=int)
@@ -39,12 +44,14 @@ def parser_creator():
                         help='No_of_exampleRows(train)/batch_size',
                         type=int)
 
-    parser.add_argument("-v", metavar='validation_steps', dest="val_steps",
+    parser.add_argument("-v", metavar='validation_steps',
+                        dest="val_steps",
                         default=128,
                         help='No_of_exampleRows(test)/batch_size',
                         type=int)
 
-    parser.add_argument("-N", metavar="LSTM units", dest="n_units",
+    parser.add_argument("-N", metavar="LSTM units",
+                        dest="n_units",
                         default=512,
                         help="Size of the network (no of LSTM units)",
                         type=int)
@@ -53,7 +60,7 @@ def parser_creator():
 if __name__ == "__main__":
     parser = parser_creator()
     args = parser.parse_args()
-    training_model = trainer(args.model_path, args.word_vec_path,
+    training_model = trainer(args.prefix, args.word_vec_path,
                              args.dataset_path)
     training_model.execute(args.n_units, args.batch_size,
                            args.epochs, args.steps_per_epoch, args.val_steps)
