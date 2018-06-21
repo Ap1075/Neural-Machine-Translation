@@ -197,7 +197,7 @@ class trainer(object):
                      "eng_maxlen": eng_length}
 #        self.save_clean_data(dict_vars, "./output/dict_vars.pkl")
 
-        with open(self.prefix+".pickle") as f:
+        with open(self.prefix+".pickle", "wb") as f:
             pickle.dump((eng_tokenizer, ger_tokenizer, dict_vars), f)
 
         trainX = self.encode_sequences(ger_tokenizer, ger_length, train[:, 1])
