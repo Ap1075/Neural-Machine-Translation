@@ -6,6 +6,9 @@ Created on Thu Jun 14 22:50:48 2018
 """
 import argparse
 from mactrans.train_mod import trainer
+import os
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 
 def parser_creator():
@@ -28,7 +31,7 @@ def parser_creator():
 
     parser.add_argument("-n", metavar="no of epochs",
                         dest="epochs",
-                        default=50,
+                        default=30,
                         help='Iterations whole dataset is passed to the model',
                         type=int)
 
@@ -64,3 +67,4 @@ if __name__ == "__main__":
                              args.dataset_path)
     training_model.execute(args.n_units, args.batch_size,
                            args.epochs, args.steps_per_epoch, args.val_steps)
+    training_model.plot_metrics()

@@ -1,14 +1,10 @@
 import numpy as np
-# import re
 import string
 import pickle
-# from unicodedata import normalize
-# import matplotlib.pyplot as plt
-# import argparse
+import matplotlib.pyplot as plt
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from keras.utils import to_categorical
-# from keras.utils.vis_utils import plot_model
 from keras.models import Sequential
 from keras.layers import LSTM
 from keras.layers import Dense
@@ -17,9 +13,7 @@ from keras.layers import RepeatVector
 from keras.layers import Bidirectional
 from keras.layers import TimeDistributed
 from keras.callbacks import ModelCheckpoint
-# from keras_attention import AttentionDecoder
 from keras.layers import Dropout
-# import keras
 import tensorflow as tf
 from keras import backend as K
 
@@ -164,6 +158,24 @@ class trainer(object):
 
         return model
 
+    def plot_metrics(self):
+
+        plt.plot(self.history.history["acc"])
+        plt.plot(self.history.history["val_acc"])
+        plt.xlabel("epochs")
+        plt.title("Acc per epoch")
+        plt.ylabel("accuracy")
+        plt.legend(["train", "test/val"])
+        plt.show()
+
+        plt.plot(self.history.history["loss"])
+        plt.plot(self.history.history["val_loss"])
+        plt.legend(["train", "test"])
+        plt.title("Losses on training and test")
+        plt.ylabel("Loss")
+        plt.xlabel("epoch")
+        plt.show()
+
     def execute(self, no_units, batch_size, epochs,
                 steps_per_epoch, val_steps):
         # filename = self.dataset_path
@@ -197,7 +209,7 @@ class trainer(object):
                      "eng_maxlen": eng_length}
 #        self.save_clean_data(dict_vars, "./output/dict_vars.pkl")
 
-        with open(self.prefix+".pickle", "wb") as f:
+        with open(self.prefix+".pkl", "wb") as f:
             pickle.dump((eng_tokenizer, ger_tokenizer, dict_vars), f)
 
         trainX = self.encode_sequences(ger_tokenizer, ger_length, train[:, 1])
@@ -215,7 +227,7 @@ class trainer(object):
 
         model = self.define_model(ger_vocab_size,
                                   eng_vocab_size, ger_length,
-                                  eng_length, no_units,embedding_mat)
+                                  eng_length, no_units, embedding_mat)
         model.compile(optimizer='adam',
                       loss='categorical_crossentropy', metrics=['acc'])
 
@@ -227,10 +239,10 @@ class trainer(object):
         generator = self.new_gen(trainX, trainY, batch_size, eng_vocab_size)
         val_data = self.new_gen(testX, testY, batch_size, eng_vocab_size)
 
-        model.fit_generator(generator=generator,
-                            validation_data=val_data,
-                            epochs=epochs,
-                            steps_per_epoch=steps_per_epoch,
-                            shuffle=False,
-                            validation_steps=val_steps,
-                            verbose=1, callbacks=[checkpt])
+        self.history = model.fit_generator(generator=generator,
+                                           validation_data=val_data,
+                                           epochs=epochs,
+                                           steps_per_epoch=steps_per_epoch,
+                                           shuffle=False,
+                                           validation_steps=val_steps,
+                                           verbose=1, callbacks=[checkpt])

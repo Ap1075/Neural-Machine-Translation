@@ -44,7 +44,7 @@ class predicter(object):
             translation = self.predictions(tokenizer, source, model)
         print(translation)
 
-    def punc_remover_lower(line):
+    def punc_remover_lower(self, line):
         cleaned = []
         punc_rem = str.maketrans("", "", string.punctuation)
         line = line.split()
