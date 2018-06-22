@@ -5,7 +5,6 @@ Created on Thu Jun 14 22:50:48 2018
 @author: Armaan Puri
 """
 import argparse
-from mactrans.train_mod import trainer
 import os
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "2"
@@ -63,6 +62,8 @@ def parser_creator():
 if __name__ == "__main__":
     parser = parser_creator()
     args = parser.parse_args()
+
+    from mactrans.train_mod import trainer
     training_model = trainer(args.prefix, args.word_vec_path,
                              args.dataset_path)
     training_model.execute(args.n_units, args.batch_size,

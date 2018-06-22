@@ -1,4 +1,3 @@
-from mactrans.pred_mod import predicter
 import argparse
 # import tensorflow as tf
 import os
@@ -24,5 +23,7 @@ if __name__ == "__main__":
     os.environ["CUDA_VISIBLE_DEVICES"] = ''
     parser = parser_creator()
     args = parser.parse_args()
+
+    from mactrans.pred_mod import predicter
     predict = predicter(args.src_sent, args.prefix)
     predict.execute()
