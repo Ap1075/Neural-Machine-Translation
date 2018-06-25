@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Jun 14 22:50:48 2018
+"""Calls the training module from mactrans.
 
-@author: Armaan Puri
+This script is designed to take in   command  line arguments necessary
+to instantiate and  execute  the    training  module. The command line
+arguments can be used to specify the directory where the trained model
+and  related  files  will  be  stored  and  also  gives the  option to
+customize the network using command line, to an extent.
 """
 import argparse
-import os
+# import os
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 
 def parser_creator():

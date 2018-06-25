@@ -1,3 +1,9 @@
+"""Calls the prediction module from mactrans.
+
+This script enables the user to provide command line arguments to
+execute  the prediction module. The module is imported and called
+from here.
+"""
 import argparse
 # import tensorflow as tf
 import os
