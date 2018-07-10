@@ -8,9 +8,9 @@ and  related  files  will  be  stored  and  also  gives the  option to
 customize the network using command line, to an extent.
 """
 import argparse
-# import os
+import os
 
-# os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 
 def parser_creator():

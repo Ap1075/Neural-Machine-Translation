@@ -113,6 +113,7 @@ class trainer(object):
                 coeffs = line[1:]
                 if c == 0:
                     c = len(coeffs)
+                    print("length of Word vectors", c)
                 embeddings[word] = coeffs
         return embeddings, c
 
