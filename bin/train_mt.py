@@ -10,7 +10,7 @@ customize the network using command line, to an extent.
 import argparse
 import os
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 
 def parser_creator():
